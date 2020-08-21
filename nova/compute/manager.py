@@ -4413,20 +4413,9 @@ class ComputeManager(manager.Manager):
 
             self._terminate_volume_connections(context, instance, bdms)
 
-            migration.status = 'reverted'
-            migration.save()
-
-            # NOTE(ndipanov): We need to do this here because dropping the
-            # claim means we lose the migration_context data. We really should
-            # fix this by moving the drop_move_claim call to the
-            # finish_revert_resize method as this is racy (revert is dropped,
-            # but instance resources will be tracked with the new flavor until
-            # it gets rolled back in finish_revert_resize, which is
-            # potentially wrong for a period of time).
-            instance.revert_migration_context()
-            instance.save()
-
-            self.rt.drop_move_claim(context, instance, instance.node)
+            # Free up the new_flavor usage from the resource tracker for this
+            # host.
+            self.rt.drop_move_claim_at_dest(context, instance, migration)
 
             # RPC cast back to the source host to finish the revert there.
             self.compute_rpcapi.finish_revert_resize(context, instance,

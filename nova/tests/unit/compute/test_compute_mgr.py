@@ -8023,7 +8023,7 @@ class ComputeManagerMigrationTestCase(test.NoDBTestCase,
         request_spec = objects.RequestSpec()
 
         @mock.patch('nova.compute.resource_tracker.ResourceTracker.'
-                    'drop_move_claim')
+                    'drop_move_claim_at_dest')
         @mock.patch('nova.compute.rpcapi.ComputeAPI.finish_revert_resize')
         @mock.patch.object(self.instance, 'revert_migration_context')
         @mock.patch.object(self.compute.network_api, 'get_instance_nw_info')
@@ -8061,9 +8061,9 @@ class ComputeManagerMigrationTestCase(test.NoDBTestCase,
                                        migration=self.migration,
                                        instance=self.instance,
                                        request_spec=request_spec)
-            mock_drop_move_claim.assert_called_once_with(self.context,
-                self.instance, self.instance.node)
-            self.assertIsNotNone(self.instance.migration_context)
+
+            mock_drop_move_claim.assert_called_once_with(
+                self.context, self.instance, self.migration)
 
         # Three fake BDMs:
         # 1. volume BDM with an attachment_id which will be updated/completed
