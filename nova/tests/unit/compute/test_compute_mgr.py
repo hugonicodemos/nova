@@ -8217,14 +8217,7 @@ class ComputeManagerMigrationTestCase(test.NoDBTestCase,
                               mock_mig_save, mock_mig_get, mock_inst_get,
                               mock_delete_scheduler_info):
 
-            def fake_drop_move_claim(*args, **kwargs):
-                # RT.drop_move_claim must be called before
-                # instance.drop_migration_context.
-                mock_drop.assert_not_called()
-
-            mock_rt = self._mock_rt()
-            # Enforce order of drop_move_claim/drop_migration_context calls.
-            mock_rt.drop_move_claim.side_effect = fake_drop_move_claim
+            self._mock_rt()
             self.instance.migration_context = objects.MigrationContext(
                 new_pci_devices=None,
                 old_pci_devices=None)
